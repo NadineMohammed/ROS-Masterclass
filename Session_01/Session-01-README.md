@@ -1,4 +1,4 @@
-# 📡 Session 01 — Robot Distance Sensor Program
+#  Session 01 — Robot Distance Sensor Program
 
 ## What does this program do?
 
