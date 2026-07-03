@@ -47,7 +47,7 @@ Takes a **list of distances**, loops through them, calls `decide_action()` for e
 Make sure you have Python 3 installed, then run:
 
 ```bash
-python robot.py
+python3 robot.py
 ```
 
 You will see the robot process 6 different test cases automatically.
