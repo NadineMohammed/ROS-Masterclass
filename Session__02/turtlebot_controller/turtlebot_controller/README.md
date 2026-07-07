@@ -117,11 +117,6 @@ In Gazebo (Terminal 1's simulation window): the TurtleBot3 model visibly
 moves or rotates according to the key pressed, matching the linear and
 angular values printed in both Terminal 2 and Terminal 3 at the same time.
 
-## Demo
-
-[Insert here: a link to a screen recording, or a written description of a
-session showing the robot responding to W/A/S/D keyboard input in Gazebo,
-with both terminal outputs visible alongside the simulation window.]
 
 ## Architecture Notes
 
