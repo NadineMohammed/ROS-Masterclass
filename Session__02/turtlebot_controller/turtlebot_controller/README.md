@@ -24,7 +24,7 @@ purely through the shared topic, with no direct reference to one another.
 ### 1. Clone this repository into your workspace's src folder
 
 cd ~/workspaces/ws_ros2/src
-git clone https://github.com/YOUR-USERNAME/turtlebot-controller-YOUR-NAME.git turtlebot_controller
+git clone https://github.com/NadineMohammed/ROS-Masterclass.git
 
 What this does: cd changes into the workspace's src directory, where colcon
 expects to find all packages. git clone downloads the repository's files
