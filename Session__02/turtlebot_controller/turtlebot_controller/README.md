@@ -6,132 +6,160 @@ velocity commands to control a TurtleBot3 robot. A second node listens to the
 same topic and reports what commands are being sent. Both nodes communicate
 purely through the shared topic, with no direct reference to one another.
 
-## Package Overview
+- **`turtlebot_controller_node`** (Publisher) — reads keyboard input and sends movement commands.
+- **`turtlebot_monitor_node`** (Subscriber) — listens to those commands and prints them out in real time.
 
-- turtlebot_controller.py (Publisher): Reads W/A/S/D/Q keyboard input, builds
-  geometry_msgs/msg/Twist messages, and publishes them to /cmd_vel.
-- turtlebot_monitor.py (Subscriber): Subscribes to /cmd_vel, extracts
-  linear.x and angular.z from each received message, and prints them.
+Both nodes communicate through the `/cmd_vel` topic using the `Twist` message type from `geometry_msgs`.
 
-## Prerequisites
+---
 
-- ROS 2 (Humble or later) installed and sourced
-- TurtleBot3 packages installed (turtlebot3, turtlebot3_gazebo, turtlebot3_msgs)
-- A configured ROS 2 workspace
+## 1. Step-by-Step Setup Instructions
 
-## Setup Instructions
+### Prerequisites
+- Ubuntu with ROS 2 installed (Humble or later)
+- A ROS 2 workspace already created (this guide assumes `~/workspaces/ws_ros2`)
+- TurtleBot3 simulation packages installed (for Gazebo testing)
 
-### 1. Clone this repository into your workspace's src folder
+> **Note — ETGAH Platform users:** If you are working on the ETGAH platform, ROS 2 and the TurtleBot3 simulation packages come **pre-installed**, and Gazebo is **already running/launched** for you. Skip the "Install ROS 2," "Install TurtleBot3 simulation packages," and "Launch Gazebo" steps below — go straight to cloning the package and building it.
 
-cd ~/workspaces/ws_ros2/src
-git clone https://github.com/NadineMohammed/ROS-Masterclass.git
+### Steps
 
-What this does: cd changes into the workspace's src directory, where colcon
-expects to find all packages. git clone downloads the repository's files
-from GitHub into a local folder named turtlebot_controller.
+1. **Clone the repository into your workspace's `src` folder:**
+```bash
+   cd ~/workspaces/ws_ros2/src
+   git clone https://github.com/YOUR-USERNAME/turtlebot-controller-YOUR-NAME.git turtlebot_controller
+```
 
-### 2. Build the package
+2. **Move into your workspace root:**
+```bash
+   cd ~/workspaces/ws_ros2
+```
 
-cd ~/workspaces/ws_ros2
-colcon build --packages-select turtlebot_controller
+3. **Build the package:**
+```bash
+   colcon build --packages-select turtlebot_controller
+```
 
-What this does: cd moves to the workspace root, one level above src, which
-is required because colcon build must be run from the workspace root, not
-from inside a package folder. colcon build compiles and installs the
-package, generating an install/ folder containing the runnable executables
-registered in setup.py. --packages-select turtlebot_controller restricts
-the build to just this package instead of the entire workspace.
+4. **Source the workspace so ROS 2 can find the new package:**
+```bash
+   source install/setup.bash
+```
 
-### 3. Source the workspace
+   > Tip: Add this line to your `~/.bashrc` so you don't have to run it in every new terminal:
+   > `echo "source ~/workspaces/ws_ros2/install/setup.bash" >> ~/.bashrc`
 
-source install/setup.bash
+---
 
-What this does: loads this workspace's packages into the current shell's
-environment (adds them to AMENT_PREFIX_PATH and the Python path) so that
-ros2 run can locate and execute them. This command must be re-run in every
-new terminal window you open, since environment variables do not persist
-across separate terminal sessions.
+## 2. Every Linux Command Used (and What It Does)
 
-## How to Test
+| Command | What it does |
+|---|---|
+| `cd <path>` | Changes the current directory to `<path>`. Used to navigate into the workspace and package folders. |
+| `mkdir -p <path>` | Creates a directory (and any missing parent directories) if it doesn't already exist. |
+| `git clone <url>` | Downloads (clones) a remote GitHub repository to your local machine. |
+| `git init` | Initializes a new, empty Git repository in the current folder. |
+| `git add .` | Stages all changed/new files in the current folder for the next commit. |
+| `git commit -m "message"` | Saves the staged changes as a new commit with a descriptive message. |
+| `git remote add origin <url>` | Links the local repository to a remote GitHub repository named `origin`. |
+| `git push -u origin main` | Uploads local commits to the `main` branch on GitHub and sets it as the default upstream branch. |
+| `source <file>` | Runs a shell script in the current terminal session so its environment changes (like ROS 2 paths) take effect immediately. |
+| `chmod +x <file>` | Makes a file executable (sometimes needed for scripts). |
+| `Ctrl+C` | Sends an interrupt signal to stop a currently running program in the terminal. |
 
-Open three separate terminals.
+---
 
-### Terminal 1: Launch the TurtleBot3 Gazebo simulation
+## 3. Every ROS 2 Command Used (and What It Does)
 
-export TURTLEBOT3_MODEL=burger
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+| Command | What it does |
+|---|---|
+| `colcon build --packages-select turtlebot_controller` | Compiles/builds only the `turtlebot_controller` package (instead of the whole workspace), generating the `build/`, `install/`, and `log/` folders. |
+| `ros2 run turtlebot_controller turtlebot_controller_node` | Runs the publisher node, which reads keyboard input and publishes `Twist` messages to `/cmd_vel`. |
+| `ros2 run turtlebot_controller turtlebot_monitor_node` | Runs the subscriber node, which listens on `/cmd_vel` and prints the linear and angular velocity values it receives. |
+| `ros2 topic list` | Lists all currently active topics, used to confirm `/cmd_vel` is being published/subscribed to. |
+| `ros2 topic echo /cmd_vel` | Prints raw `Twist` messages being published on `/cmd_vel` directly from the command line (useful for debugging without the monitor node). |
+| `ros2 node list` | Lists all currently running ROS 2 nodes, used to confirm both nodes are active. |
+| `ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py` | Launches the TurtleBot3 simulation in Gazebo so the robot can be controlled and observed visually. |
 
-What this does: export TURTLEBOT3_MODEL=burger sets an environment variable
-telling the TurtleBot3 packages which physical robot variant to simulate
-(the Burger model). ros2 launch starts Gazebo, spawns the robot model into
-the simulated world, and starts the internal bridge connecting ROS 2 topics
-(including /cmd_vel) to the simulation engine. Leave this terminal running
-throughout testing.
+---
 
-### Terminal 2: Run the monitor (subscriber) node
+## 4. How to Test the Nodes
 
-cd ~/workspaces/ws_ros2
-source install/setup.bash
-ros2 run turtlebot_controller turtlebot_monitor_node
+1. **Start the TurtleBot3 simulation** (in its own terminal):
+```bash
+   export TURTLEBOT3_MODEL=burger
+   ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+   > **ETGAH Platform users:** Skip this step — Gazebo and the TurtleBot3 simulation are already launched and running for you on the platform.
 
-What this does: source install/setup.bash loads the workspace environment
-in this new terminal, required separately per terminal session. ros2 run
-package_name executable_name launches the node using the entry point
-registered in setup.py. This node immediately begins listening on /cmd_vel
-and prints any message it receives. Run this before the controller node so
-it is already listening when messages start arriving.
+2. **Open a second terminal**, source the workspace, and start the monitor (subscriber) node:
+```bash
+   source ~/workspaces/ws_ros2/install/setup.bash
+   ros2 run turtlebot_controller turtlebot_monitor_node
+```
 
-### Terminal 3: Run the controller (publisher) node
+3. **Open a third terminal**, source the workspace, and start the controller (publisher) node:
+```bash
+   source ~/workspaces/ws_ros2/install/setup.bash
+   ros2 run turtlebot_controller turtlebot_controller_node
+```
 
-cd ~/workspaces/ws_ros2
-source install/setup.bash
-ros2 run turtlebot_controller turtlebot_controller_node
+4. **Use the keyboard to control the robot** in the terminal running the controller node:
+   - `W` → move forward
+   - `S` → move backward
+   - `A` → turn left
+   - `D` → turn right
+   - `Q` → stop and exit (publishes one final zero-velocity command so the robot doesn't keep drifting)
 
-What this does: starts the publisher node. Once running, it immediately
-begins reading keyboard input:
-- W moves forward
-- S moves backward
-- A turns left
-- D turns right
-- Q stops the robot and exits the node
+5. **Watch the results:**
+   - The robot should move in Gazebo as you press keys.
+   - The terminal running the monitor node should print the `linear.x` and `angular.z` values every time a command is sent.
 
-This terminal must remain the active, focused window while pressing keys,
-since keyboard input is read directly from this terminal's standard input.
+---
 
-## Expected Output
+## 5. Expected Output
 
-Terminal 3 (Controller), on pressing W:
-[INFO] [turtlebot_controller]: Published: linear.x=0.20, angular.z=0.00
+**Controller node terminal**, once running, waits silently for key presses (no output needed to function, just listens for W/A/S/D/Q).
 
-Terminal 2 (Monitor), at the same moment:
-[INFO] [turtlebot_monitor]: Received -> linear.x: 0.20, angular.z: 0.00
+**Monitor node terminal** should print something like:
+```
+[INFO] Received cmd_vel -> linear.x: 0.20, angular.z: 0.00
+[INFO] Received cmd_vel -> linear.x: 0.00, angular.z: 0.50
+[INFO] Received cmd_vel -> linear.x: -0.20, angular.z: 0.00
+[INFO] Received cmd_vel -> linear.x: 0.00, angular.z: -0.50
+```
 
-On pressing Q:
-[INFO] [turtlebot_controller]: Q pressed. Stopping and exiting.
+**Gazebo simulation** should show the TurtleBot3 physically moving forward, backward, left, and right in sync with the keys pressed, and stopping completely when `Q` is pressed.
 
-A final zero-velocity command is published immediately before the node
-exits, ensuring the robot does not continue executing its last received
-command after the controller node has stopped.
+---
 
-In Gazebo (Terminal 1's simulation window): the TurtleBot3 model visibly
-moves or rotates according to the key pressed, matching the linear and
-angular values printed in both Terminal 2 and Terminal 3 at the same time.
+## 6. Demo
 
+Terminal screenshots from a real test run (publisher, subscriber, and Gazebo simulation working together) are included in this repository under [`demo/`](./demo).
 
-## Architecture Notes
+- Screenshot of the controller node running and accepting W/A/S/D/Q key presses.
+- Screenshot of the monitor node printing `linear.x` and `angular.z` values in real time as commands are sent.
+- Screenshot of the TurtleBot3 moving in the Gazebo simulation on the ETGAH platform in response to those commands.
 
-Node isolation: each node runs as a separate operating system process with
-its own memory space. They never share variables or call each other's
-functions directly.
+---
 
-Topic-based decoupling: the publisher and subscriber contain no direct
-reference to one another. They are connected only by a shared topic name
-(/cmd_vel) and message type (geometry_msgs/msg/Twist).
+## Package Structure
 
-DDS discovery: ROS 2 nodes locate each other automatically through DDS's
-peer discovery mechanism, without any central master process required.
+```
+turtlebot_controller/
+    turtlebot_controller/
+        __init__.py
+        turtlebot_controller.py     # Publisher node
+        turtlebot_monitor.py        # Subscriber node
+    resource/
+        turtlebot_controller
+    test/
+    package.xml
+    setup.py
+    setup.cfg
+    README.md
+```
 
-QoS queue depth: both nodes use a queue depth of 10, meaning up to 10
-unprocessed messages are buffered before the oldest ones are discarded if a
-node falls behind. This is appropriate here since only the most recent
-velocity command is meaningful for real-time robot control.
+## Dependencies
+
+- `rclpy` — Python client library for ROS 2
+- `geometry_msgs` — provides the `Twist` message type used to represent linear and angular velocity commands
