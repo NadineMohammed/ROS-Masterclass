@@ -128,7 +128,7 @@ obstacle_direction_interfaces.srv.SetDirection_Response(success=True, message="M
 
 ## 5. Demo
 
-A video recording of a real test run (autonomous avoidance and manual override both working, with the robot moving in Gazebo and the node's console output visible) is available here: [Demo Video](PASTE_YOUR_VIDEO_LINK_HERE)
+A video recording of a real test run (autonomous avoidance and manual override both working, with the robot moving in Gazebo and the node's console output visible) is available here
 
 The video shows:
 - The node running, with `F:` / `L:` / `R:` distance logs and a state transition into `TURN`.
