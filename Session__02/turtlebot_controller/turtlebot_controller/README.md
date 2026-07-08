@@ -134,7 +134,7 @@ Both nodes communicate through the `/cmd_vel` topic using the `Twist` message ty
 
 ## 6. Demo
 
-Terminal screenshots from a real test run (publisher, subscriber, and Gazebo simulation working together) are included in this repository under [`demo/`](./demo).
+Terminal screenshots from a real test run (publisher, subscriber, and Gazebo simulation working together) are included in this repository Session__2 folder.
 
 - Screenshot of the controller node running and accepting W/A/S/D/Q key presses.
 - Screenshot of the monitor node printing `linear.x` and `angular.z` values in real time as commands are sent.
