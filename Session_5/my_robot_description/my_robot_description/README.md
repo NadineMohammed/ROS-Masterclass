@@ -79,8 +79,7 @@ In RViz2:
 
 *(Add at least two screenshots here — full robot view in the URDF Visualizer, from different angles.)*
 
-![Screenshot 1](screenshot1.png)
-![Screenshot 2](screenshot2.png)
+  ![Screenshot 1](Robot_urdf.png)
 
 ## Notes
 
