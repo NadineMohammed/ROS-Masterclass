@@ -77,9 +77,8 @@ In RViz2:
 
 ## Screenshots
 
-*(Add at least two screenshots here — full robot view in the URDF Visualizer, from different angles.)*
+*(You will find the video and screenshot named Robot_urdf )*
 
-  ![Screenshot 1](Robot_urdf.png)
 
 ## Notes
 
