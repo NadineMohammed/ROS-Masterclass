@@ -128,11 +128,12 @@ obstacle_direction_interfaces.srv.SetDirection_Response(success=True, message="M
 
 ## 5. Demo
 
-Terminal screenshots and/or a recording of a real test run (autonomous avoidance and manual override both working, with the robot moving in Gazebo and the node's console output visible) are included in this repository under [`demo/`](./demo).
+A video recording of a real test run (autonomous avoidance and manual override both working, with the robot moving in Gazebo and the node's console output visible) is available here
 
-- Screenshot of the node running, showing `F:`/`L:`/`R:` distance logs and a state transition into `TURN`.
-- Screenshot of the `/set_direction` service call and its response in the terminal.
-- Screenshot/recording of the TurtleBot3 avoiding an obstacle and responding to an override command in Gazebo.
+The video shows:
+- The node running, with `F:` / `L:` / `R:` distance logs and a state transition into `TURN`.
+- The `/set_direction` service call and its response in the terminal.
+- The TurtleBot3 avoiding an obstacle and responding to an override command in Gazebo.
 
 ---
 

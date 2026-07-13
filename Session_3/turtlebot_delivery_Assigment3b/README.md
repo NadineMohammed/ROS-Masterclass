@@ -168,11 +168,12 @@ Result: delivery_mission_interfaces.action.DeliveryMission_Result(success=False,
 
 ## 5. Demo
 
-Terminal screenshots and/or a recording of real test runs (all three test cases: successful completion, timeout abort, and mid-mission cancel) are included in this repository under [`demo/`](./demo).
+A video recording of real test runs (all three test cases: successful completion, timeout abort, and mid-mission cancel) is available here: [Demo Video](PASTE_YOUR_VIDEO_LINK_HERE)
 
-- Screenshot of a full mission running, showing all 3 phases and streaming feedback in the client terminal.
-- Screenshot of a mission aborting due to timeout, with the corresponding server log.
-- Screenshot of a mission being canceled mid-execution, with the robot visibly stopped in Gazebo.
+The video shows:
+- A full mission running, with all 3 phases executing and feedback streaming live in the client terminal.
+- A mission aborting due to timeout, with the corresponding server log.
+- A mission being canceled mid-execution, with the robot visibly stopped in Gazebo.
 
 ---
 
