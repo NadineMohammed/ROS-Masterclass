@@ -51,18 +51,6 @@ my_robot_description/
 # Navigate to workspace
 cd ~/workspaces/my_robot_ws
 
-# Rename files to match required naming
-mv robot_description.urdf.xacro robot.urdf.xacro
-mv robot_description.gazebo robot.gazebo.xacro
-
-# Create the rviz folder before first build
-mkdir -p ~/workspaces/my_robot_ws/src/my_robot_description/rviz
-
-# Kill stuck processes when needed
-pkill -f gz
-pkill -f rviz2
-pkill -f robot_state_publisher
-
 # Check running nodes / processes
 ros2 node list
 ps aux | grep gz
@@ -215,27 +203,7 @@ or disconnected frames (see `screenshots/tf_tree.png`).
 | `screenshots/gazebo_view.png` | Robot spawned and sitting level inside the `turtlebot3_house.world` Gazebo environment |
 | `videos/TestVideo.mp4` | Demonstration of the robot moving via `/cmd_vel`, with LiDAR and camera data visible live in RViz |
 
-## 11. Known Environment Limitation
 
-This project was developed and tested on a cloud-based VM without dedicated GPU
-acceleration. As a result, the LiDAR sensor's actual publish rate on `/scan` runs
-lower than its configured `update_rate` (approximately 1.5–1.7 Hz observed vs. 10 Hz
-configured). This is a hardware/resource constraint of the environment, not a fault
-in the robot description or sensor configuration — `/scan` still publishes valid,
-correctly-framed data (fixed via the `gz_frame_id` correction described in the build
-history), just at a reduced rate.
-
-## 12. Key Fixes Made During Development
-
-- Corrected the DiffDrive and JointStatePublisher plugins to reference the robot's
-  actual joint names (`left_wheel_joint`, `right_wheel_joint`) instead of leftover
-  4-wheel template names.
-- Corrected `wheel_separation` and `wheel_radius` values in the DiffDrive plugin to
-  match the URDF's actual dimensions.
-- Fixed the caster wheel's vertical offset so it sits correctly on the ground
-  instead of embedding into it, which was previously causing the robot to tip.
-- Fixed a stale Gazebo model-name reference in `gz_bridge.yaml` for `/joint_states`
-  after renaming the spawned entity.
 - Added the missing `gz_frame_id` tag and an explicit `<vertical>` block to the
   LiDAR sensor definition, which was required for RViz to correctly render the
   LaserScan data relative to the robot's TF tree.
