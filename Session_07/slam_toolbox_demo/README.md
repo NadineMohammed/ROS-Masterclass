@@ -135,6 +135,38 @@ ros2 run tf2_tools view_frames
 # Confirm nodes are alive
 ros2 node list
 ```
+### Termianl Output
+```
+$ ros2 topic echo /odom
+header:
+  stamp:
+    sec: 7205
+    nanosec: 400000000
+  frame_id: odom
+child_frame_id: base_footprint
+pose:
+  pose:
+    position:
+      x: 1.234
+      y: -0.567
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+      z: 0.123
+      w: 0.992
+twist:
+  twist:
+    linear:
+      x: 0.2
+      y: 0.0
+      z: 0.0
+    angular:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+---
+```
 
 ## 5. Expected Output
 
