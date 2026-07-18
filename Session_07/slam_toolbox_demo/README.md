@@ -3,8 +3,12 @@
 ## 1. Project Overview
 
 This package demonstrates a complete SLAM (Simultaneous Localization and Mapping)
-workflow using **SLAM Toolbox** in ROS 2. It builds on the differential-drive robot
-from Session 6 and runs entirely in the `turtlebot3_world` Gazebo environment.
+workflow using **SLAM Toolbox** in ROS 2, running on the **ETGAH cloud platform**
+(no local ROS 2 / SLAM Toolbox installation required — the environment comes
+pre-configured).
+
+The simulation uses the standard **TurtleBot3** robot in the **turtlebot3_world**
+Gazebo environment.
 
 The project has two phases:
 
@@ -31,24 +35,32 @@ slam_toolbox_demo/
 ├── posegraph/
 │   ├── turtlebot3_world.posegraph       # Serialized SLAM pose graph
 │   └── turtlebot3_world.data            # Serialized SLAM pose graph data
-├── screenshots/                         # Proof-of-work screenshots (see Section 9)
-├── videos/                              # Demo videos + GIFs (see Section 9)
+├── screenshots/
+│   ├── GeneratingMapProcess.png         # Map being built live during mapping
+│   ├── SavedMapFileView.png             # Saved .yaml/.pgm map files
+│   ├── CompletedMapRviz.png             # Finished map in RViz
+│   ├── tf.png                           # TF tree image
+│   └── tf_tree.pdf                      # TF tree (original PDF export)
+├── videos/
+│   ├── CreatingMap.mp4 / .gif           # Mapping phase demo
+│   ├── WrongPose.mp4                    # Wrong 2D Pose Estimate demo
+│   ├── 2DPose.mp4                       # Correct 2D Pose Estimate demo
+│   ├── RobotMovingInSavedMap.mp4        # Localization confirmed while driving
+│   └── MovingAroundCreatedMap.mp4 / .gif
 ├── CMakeLists.txt
 ├── package.xml
 └── README.md
 ```
 
 **Note:** SLAM Toolbox itself does not launch Gazebo, spawn the robot, or open
-RViz — these launch files assume the robot's own Gazebo + bridge + RViz session
-(from the `my_robot_description` package, Session 6) is already running, with
-`/scan` and `/odom` actively publishing.
+RViz — these launch files assume the TurtleBot3 Gazebo simulation is already
+running, with `/scan` and `/odom` actively publishing.
 
 ## 3. Step-by-Step Setup Instructions
 
-### Prerequisites
-```bash
-sudo apt install ros-${ROS_DISTRO}-slam-toolbox ros-${ROS_DISTRO}-nav2-map-server
-```
+This project runs entirely on the **ETGAH platform**, where ROS 2, Gazebo, and
+SLAM Toolbox are pre-installed — no manual installation or environment setup is
+required. Simply start the workspace and follow the steps below.
 
 ### Build
 ```bash
@@ -59,23 +71,26 @@ source install/setup.bash
 
 ### Phase 1 — Mapping
 
-1. In a separate terminal/workspace, launch the robot in `turtlebot3_world`
-   (Gazebo + bridge + RViz), confirming `/scan` and `/odom` are publishing.
+1. Start the TurtleBot3 simulation in `turtlebot3_world` from the ETGAH
+   Workspaces/Worlds panel (or via its launch command), and confirm `/scan`
+   and `/odom` are publishing.
 2. Launch SLAM Toolbox in mapping mode:
    ```bash
    ros2 launch slam_toolbox_demo slam_toolbox_online_async.launch.py
    ```
-3. In RViz, set **Fixed Frame** to `map` and add displays: `RobotModel`, `TF`,
-   `LaserScan` (topic `/scan`), and `Map` (topic `/map`).
+3. Open RViz, set **Fixed Frame** to `map`, and add displays: `RobotModel`,
+   `TF`, `LaserScan` (topic `/scan`), and `Map` (topic `/map`).
 4. Drive the robot around the entire world using keyboard teleop:
    ```bash
    ros2 run teleop_twist_keyboard teleop_twist_keyboard
    ```
-5. Watch the occupancy grid build live in RViz as you explore.
+5. Watch the occupancy grid build live in RViz as you explore
+   (see `screenshots/GeneratingMapProcess.png` and `videos/CreatingMap.gif`).
 6. Once mapping is complete, save the map:
    ```bash
    ros2 run nav2_map_server map_saver_cli -f ~/workspaces/slam_ws/src/slam_toolbox_demo/map/turtlebot3_world_map
    ```
+   (see `screenshots/SavedMapFileView.png`)
 7. Serialize the pose graph for later localization:
    ```bash
    ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph "{filename: '/root/workspaces/slam_ws/src/slam_toolbox_demo/posegraph/turtlebot3_world'}"
@@ -92,15 +107,16 @@ source install/setup.bash
    ros2 launch slam_toolbox_demo localization.launch.py
    ```
 3. In RViz, the `Map` display now shows the fixed, previously saved map
-   instead of a live-growing one.
+   instead of a live-growing one (see `screenshots/CompletedMapRviz.png`).
 4. Click **2D Pose Estimate** and give the robot a deliberately wrong
    starting pose — observe the LaserScan misaligning with the map
-   (see Section 8).
+   (see `videos/WrongPose.mp4` and Section 8).
 5. Click **2D Pose Estimate** again, this time at the robot's true position
    and orientation — observe the LaserScan snapping into alignment with the
-   map (see Section 8).
+   map (see `videos/2DPose.mp4` and Section 8).
 6. Drive the robot around and confirm the LaserScan stays aligned with the
-   map as it moves, verifying localization is actively tracking.
+   map as it moves (see `videos/RobotMovingInSavedMap.mp4` and
+   `videos/MovingAroundCreatedMap.gif`).
 
 ## 4. How to Test Your Nodes
 
@@ -123,124 +139,127 @@ ros2 node list
 ## 5. Expected Output
 
 - **Mapping phase:** the occupancy grid in RViz grows to match the real
-  layout of `turtlebot3_world` as the robot explores; loop closures (cyan
-  lines in the pose graph visualization) appear when the robot revisits an
-  already-mapped area, correcting accumulated drift.
+  layout of `turtlebot3_world` as the robot explores; loop closures appear
+  when the robot revisits an already-mapped area, correcting accumulated
+  drift.
 - **Localization phase:** with a correct pose estimate, the LaserScan
   consistently overlays the saved map's walls as the robot drives, and the
   map itself never changes — only the robot's estimated position updates.
 
 ## 6. TF Tree Explanation
 
-With SLAM Toolbox running, an additional `map` frame is added on top of the
-existing TF tree from Session 6:
+This project uses the standard **TurtleBot3** robot model, so the TF tree
+below uses TurtleBot3's own frame names (rather than a custom robot's frame
+names), verified with `ros2 run tf2_tools view_frames`
+(see `screenshots/tf.png` and `screenshots/tf_tree.pdf`):
 
 ```
 map
  └── odom
       └── base_footprint
            └── base_link
-                ├── left_wheel
-                ├── right_wheel
-                ├── caster_wheel
-                ├── lidar_link
-                └── camera_link
-                     └── camera_optical_link
+                ├── wheel_left_link
+                ├── wheel_right_link
+                ├── caster_back_link
+                ├── imu_link
+                └── base_scan
 ```
 
 - `map → odom`: published by SLAM Toolbox. This transform is what gets
   corrected whenever scan matching detects drift — it represents "how wrong
   the robot's odometry has become relative to the true map."
-- `odom → base_footprint`: published by the robot's own odometry system
-  (DiffDrive plugin), same as in Session 6 — this is the raw, uncorrected
-  wheel-based estimate.
-- Everything from `base_footprint` downward is unchanged from Session 6.
+- `odom → base_footprint`: published by TurtleBot3's own odometry system,
+  based on wheel encoders — this is the raw, uncorrected motion estimate.
+- `base_footprint → base_link`: static offset lifting the robot body above
+  ground level.
+- `base_link → wheel_left_link / wheel_right_link`: the two driven wheels.
+- `base_link → caster_back_link`: the passive rear support wheel.
+- `base_link → imu_link`: the onboard IMU sensor frame.
+- `base_link → base_scan`: the LiDAR sensor frame, source of `/scan` data
+  used for scan matching against the map.
 
 This two-layer correction (`map → odom` correcting drift, `odom → base_link`
 providing continuous raw motion) is the standard ROS 2 localization pattern.
 
-## 7. `/odom` Terminal Output
+## 7. Wrong Pose vs. Correct Pose — Expected Output and Observations
 
-```
-$ ros2 topic echo /odom
----
-header:
-  stamp:
-    sec: <value>
-    nanosec: <value>
-  frame_id: odom
-child_frame_id: base_footprint
-pose:
-  pose:
-    position:
-      x: <value>
-      y: <value>
-      z: 0.0
-    orientation:
-      x: 0.0
-      y: 0.0
-      z: <value>
-      w: <value>
-twist:
-  twist:
-    linear:
-      x: <value>
-      y: 0.0
-      z: 0.0
-    angular:
-      x: 0.0
-      y: 0.0
-      z: <value>
----
-```
+**Wrong 2D Pose Estimate** (`videos/WrongPose.mp4`):
+When a deliberately incorrect 2D Pose Estimate is given (clicking a location
+in a different area of the map than the robot's actual position), the
+expected — and observed — output is:
+- The LaserScan points do not align with the map's walls; scan points appear
+  in open, gray (unexplored/free) space with no corresponding obstacle drawn
+  on the map, or cut through walls that should not be visible from that
+  position.
+- The RobotModel marker appears to sit in a location inconsistent with the
+  robot's real position in the simulator (e.g., inside a different room or
+  overlapping a wall).
+- The mismatch does not self-correct on its own — it persists until a
+  correct pose estimate is provided.
 
-*(Replace the placeholder values above with an actual snippet captured from
-your own terminal session before submitting.)*
+**Correct 2D Pose Estimate** (`videos/2DPose.mp4`):
+When an accurate 2D Pose Estimate is given, matching the robot's true
+position and heading, the expected — and observed — output is:
+- The LaserScan snaps into close alignment with the map's walls, with the
+  red scan trace closely overlapping the black wall boundaries already
+  present on the saved map.
+- The RobotModel marker sits exactly where expected relative to those walls.
+- Driving the robot afterward (`videos/RobotMovingInSavedMap.mp4`,
+  `videos/MovingAroundCreatedMap.gif`) confirms the alignment holds steady
+  as it moves — the map itself does not grow or change, only the robot's
+  estimated pose updates, confirming localization is actively and correctly
+  tracking rather than a one-time coincidental match.
 
-## 8. Wrong Pose vs. Correct Pose — Observations
+## 8. Demo — Screenshots
 
-**Wrong 2D Pose Estimate:**
-After providing a deliberately incorrect 2D Pose Estimate (clicking a
-location in a different area of the world than the robot's actual position),
-the LaserScan data did not align with the map's walls — scan points appeared
-in open floor space with no corresponding obstacle on the map, and the
-robot's estimated position visually conflicted with its actual location in
-Gazebo. See `screenshots/wrong_pose_estimate.png`.
+### Mapping Phase
 
-**Correct 2D Pose Estimate:**
-After providing an accurate 2D Pose Estimate matching the robot's true
-position and orientation, the LaserScan snapped into close alignment with
-the map's walls, and this alignment was maintained while driving the robot
-around afterward, confirming localization was actively and correctly
-tracking the robot's position. See `screenshots/correct_pose_estimate.png`.
+**Map being generated live while driving:**
+![Generating Map Process](screenshots/GeneratingMapProcess.png)
 
-## 9. Demo — Screenshots and Videos
+**Saved map files (.yaml / .pgm):**
+![Saved Map File View](screenshots/SavedMapFileView.png)
 
-| File | Description |
-|---|---|
-| `screenshots/build_clean.png` | Clean `colcon build`, no errors |
-| `screenshots/mapping_launch_clean.png` | Mapping node activating with no errors |
-| `screenshots/completed_map_rviz.png` | Finished map with RobotModel, TF, LaserScan |
-| `screenshots/localization_launch_clean.png` | Localization node activating with no errors |
-| `screenshots/wrong_pose_estimate.png` | LaserScan misaligned with map |
-| `screenshots/correct_pose_estimate.png` | LaserScan aligned with map |
-| `screenshots/tf_tree.png` | `map → odom → base_footprint → base_link` |
+### Localization Phase
+
+**Completed map reloaded in RViz:**
+![Completed Map in RViz](screenshots/CompletedMapRviz.png)
+
+### TF Tree
+
+![TF Tree](screenshots/tf.png)
+
+*(Full vector version also available at `screenshots/tf_tree.pdf`.)*
+
+## 9. Demo — Videos and GIFs
 
 ### Mapping Demo
 
-![Mapping Demo](videos/mapping_demo.gif)
+![Creating Map](videos/CreatingMap.gif)
 
-### Localization Demo
+Full video: `videos/CreatingMap.mp4`
 
-![Localization Demo](videos/localization_demo.gif)
+### Wrong Pose Estimate Demo
 
-*(Full-length videos are also included as `videos/mapping_demo.mp4` and
-`videos/localization_demo.mp4` for reference, since GitHub does not render
-`.mp4` playback inline within a README.)*
+Full video: `videos/WrongPose.mp4`
 
-## 10. Known Environment Notes
+### Correct Pose Estimate Demo
 
-This project was developed on a cloud-based VM without dedicated GPU
-acceleration (carried over from Session 6). Sensor publish rates may run
-below their configured values under load, but do not affect the correctness
-of the mapping or localization results demonstrated here.
+Full video: `videos/2DPose.mp4`
+
+### Localization While Driving
+
+![Moving Around Created Map](videos/MovingAroundCreatedMap.gif)
+
+Full videos: `videos/RobotMovingInSavedMap.mp4`,
+`videos/MovingAroundCreatedMap.mp4`
+
+*(GitHub renders `.gif` files inline automatically. `.mp4` files do not play
+inline in a README and are linked for direct download/viewing instead.)*
+
+## 10. Platform Note
+
+This project was built and run entirely on the **ETGAH cloud platform**,
+which comes with ROS 2, Gazebo, and SLAM Toolbox pre-installed. No manual
+installation of ROS 2, SLAM Toolbox, or Nav2 map server was required —
+the workspace was ready to build and launch directly.
